@@ -34,12 +34,13 @@ class _GoLiveScreenState extends State<GoLiveScreen> {
     if(channelId.isNotEmpty){
       showSnackBar(context, 'Livestream has started successfully');
       Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const BroadcastScreen(
-
-          ),
-          ),);
+        builder: (context) => BroadcastScreen(
+          isBroadcaster: true,
+          channelId: channelId,
+        ),
+      ),);
     }
-    }
+  }
 
   @override
   Widget build(BuildContext context) {

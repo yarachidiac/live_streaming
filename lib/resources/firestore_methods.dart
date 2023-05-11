@@ -69,5 +69,17 @@ class FirestoreMethods{
     }
     }
 
+  Future<void> updateViewCount(String channelId, bool isIncreased) async{
+    try{
+      await _firestore.collection('livestream').doc(channelId).update({
+        'viewers': FieldValue.increment(isIncreased ? 1 : -1),
+      });
+    }catch(e){
+      debugPrint(e.toString());
+    }
+  }
+
+
+
 
 }
