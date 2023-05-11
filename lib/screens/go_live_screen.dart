@@ -8,6 +8,7 @@ import 'package:project_live_streaming/widgets/custom_button.dart';
 import 'package:project_live_streaming/widgets/custom_textfield.dart';
 
 import '../utils/colors.dart';
+import 'broadcast_screen.dart';
 
 class GoLiveScreen extends StatefulWidget {
   const GoLiveScreen({Key? key}) : super(key: key);
@@ -27,6 +28,18 @@ class _GoLiveScreenState extends State<GoLiveScreen> {
   }
 
   Uint8List? image;
+
+  goLiveStream() async{
+    String channelId = await _firestoreMethods.startLiveStream(context, _titleController.text, image);
+    if(channelId.isNotEmpty){
+      showSnackBar(context, 'Livestream has started successfully');
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const BroadcastScreen(
+
+          ),
+          ),);
+    }
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +124,7 @@ class _GoLiveScreenState extends State<GoLiveScreen> {
 
               Padding(
                 padding: const EdgeInsets.only(bottom: 10.0),
-                child: CustomButton(onTap: () {}, text: 'Go live'),
+                child: CustomButton(onTap: goLiveStream, text: 'Go live'),
               )
             ],
           ),
