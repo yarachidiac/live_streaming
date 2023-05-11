@@ -37,7 +37,7 @@ class FirestoreMethods{
       }else{
         showSnackBar(context, 'Please enter all the fields');
       }
-
+//p
     } on FirebaseException catch(e){
       showSnackBar(context, e.message!);
     }
