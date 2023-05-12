@@ -85,8 +85,8 @@ class FirestoreMethods{
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
       String commentId = Uuid().v1();
-      await _firestore.collection('livestream').doc(channelId).collection(
-          'comments').doc(commentId).set({
+      await _firestore.collection('livestream').doc(channelId).collection('comments')
+          .doc(commentId).set({
         'username': userProvider.user.username,
         'message': text,
         'uid': userProvider.user.uid,
