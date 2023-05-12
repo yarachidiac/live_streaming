@@ -6,6 +6,7 @@ import 'package:project_live_streaming/config/appId.dart';
 import 'package:project_live_streaming/providers/user_provider.dart';
 import 'package:project_live_streaming/resources/firestore_methods.dart';
 import 'package:project_live_streaming/screens/home_screen.dart';
+import 'package:project_live_streaming/widgets/chat.dart';
 import 'package:provider/provider.dart';
 import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
 import 'package:agora_rtc_engine/rtc_remote_view.dart' as RtcRemoteView;
@@ -151,6 +152,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     ],
                   ),
                 ),
+              Flexible(child: Chat(channelId: widget.channelId,))
             ],
           ),
         ),
