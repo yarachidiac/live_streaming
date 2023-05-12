@@ -82,7 +82,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
       await [Permission.microphone, Permission.camera].request();
       await _engine.joinChannelWithUserAccount(
           tempToken,
-          'test1',
+          widget.channelId,
           Provider.of<UserProvider>(context, listen: false).user.uid
       );
     }
