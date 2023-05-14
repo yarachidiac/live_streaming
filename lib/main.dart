@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:project_live_streaming/providers/user_provider.dart';
 import 'package:project_live_streaming/resources/auth_methods.dart';
+import 'package:project_live_streaming/screens/add_post.dart';
 import 'package:project_live_streaming/screens/home_screen.dart';
 import 'package:project_live_streaming/screens/login_screen.dart';
 import 'package:project_live_streaming/screens/onboarding_screen.dart';
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
         LoginScreen.routeName: (context) => const LoginScreen(),
         SignupScreen.routeName: (context) => const SignupScreen(),
         HomeScreen.routeName: (context) => const HomeScreen(),
+        AddPostScreen.routeName:(context)=>const AddPostScreen(),
       },
       home: FutureBuilder(
           future: AuthMethods().getCurrentUser(FirebaseAuth.instance.currentUser != null ? FirebaseAuth.instance.currentUser!.uid : null).then((value) {

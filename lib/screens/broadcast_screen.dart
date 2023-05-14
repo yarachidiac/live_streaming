@@ -31,7 +31,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
   List<int> remoteUid = [];
   bool switchCamera = true;
   bool isMuted = false;
-  late DocumentSnapshot<Map<String, dynamic>> _broadcaster;
+  late User _broadcaster;
 
 
   @override
@@ -39,7 +39,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     // TODO: implement initState
     super.initState();
     _initEngine();
-    getBroadcasterProfileUsername();
+  //  getBroadcasterProfileUsername();
   }
 
   void _initEngine() async {
@@ -59,13 +59,14 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     _joinChannel();
   }
 
-  getBroadcasterProfileUsername() async{
+  /*Future<User>getBroadcasterProfileUsername() async{
     FirestoreMethods _firestoreMethods = FirestoreMethods();
     _broadcaster = await _firestoreMethods.getBroadcasterProfileUsername(widget.channelId);
     setState(() {});
-  }
+    return _broadcaster;
+  }*/
 
-  String baseUrl = "https://agora-tutorial-server.onrender.com";
+  String baseUrl = "https://agora-server-zc6n.onrender.com";
 
   String? token;
 
@@ -209,11 +210,11 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                   ),
                 ),
               Flexible(child: Chat(channelId: widget.channelId,)),
-    if (_broadcaster.exists)
-    Text(_broadcaster.data()?['username'] ?? 'No username found')
 
 
-    ],
+
+
+            ],
           ),
         ),
       ),

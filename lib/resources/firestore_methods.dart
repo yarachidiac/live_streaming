@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/livestream.dart';
+import '../models/user.dart';
 import '../utils/utils.dart';
 
 
@@ -111,7 +112,7 @@ class FirestoreMethods{
     }
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>>  getBroadcasterProfileUsername(String channelId) async {
+  Future<User> getBroadcasterProfileUsername(String channelId) async {
     DocumentSnapshot liveStreamSnapshot = await FirebaseFirestore.instance
         .collection('livestream')
         .doc(channelId)
@@ -124,7 +125,8 @@ class FirestoreMethods{
         .doc(broadcasterUid)
         .get();
 
-    return userSnapshot as DocumentSnapshot<Map<String, dynamic>>;
+    User user = User.fromMap(userSnapshot.data()! as Map<String, dynamic>);
+    return user;
   }
 
 
