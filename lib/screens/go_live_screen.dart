@@ -85,9 +85,9 @@ class _GoLiveScreenState extends State<GoLiveScreen> {
                               color: buttonColor.withOpacity(.05),
                               borderRadius: BorderRadius.circular(10)
                           ),
-                          child: Column(
+                          child: const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               Icon(
                                 Icons.folder_open,
                                 color: buttonColor,

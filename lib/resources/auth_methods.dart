@@ -29,6 +29,9 @@ class AuthMethods{
           username: username.trim(),
           email: email.trim(),
           uid: cred.user!.uid,
+          image: '',
+          followers: [],
+          following: []
         );
         await _userRef.doc(cred.user!.uid).set(user.toMap());
         Provider.of<UserProvider>(context, listen: false).setUser(user);

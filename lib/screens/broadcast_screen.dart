@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:agora_rtc_engine/rtc_engine.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -13,6 +14,8 @@ import 'package:provider/provider.dart';
 import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
 import 'package:agora_rtc_engine/rtc_remote_view.dart' as RtcRemoteView;
 import 'package:http/http.dart' as http;
+
+import '../models/user.dart';
 
 class BroadcastScreen extends StatefulWidget {
   final bool isBroadcaster;
@@ -28,12 +31,15 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
   List<int> remoteUid = [];
   bool switchCamera = true;
   bool isMuted = false;
+  late DocumentSnapshot<Map<String, dynamic>> _broadcaster;
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _initEngine();
+    getBroadcasterProfileUsername();
   }
 
   void _initEngine() async {
@@ -51,6 +57,12 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     }
 
     _joinChannel();
+  }
+
+  getBroadcasterProfileUsername() async{
+    FirestoreMethods _firestoreMethods = FirestoreMethods();
+    _broadcaster = await _firestoreMethods.getBroadcasterProfileUsername(widget.channelId);
+    setState(() {});
   }
 
   String baseUrl = "https://agora-tutorial-server.onrender.com";
@@ -196,8 +208,12 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     ],
                   ),
                 ),
-              Flexible(child: Chat(channelId: widget.channelId,))
-            ],
+              Flexible(child: Chat(channelId: widget.channelId,)),
+    if (_broadcaster.exists)
+    Text(_broadcaster.data()?['username'] ?? 'No username found')
+
+
+    ],
           ),
         ),
       ),
@@ -219,4 +235,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
           : Container()
       ,);
   }
+
+
+
 }

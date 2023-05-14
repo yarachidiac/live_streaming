@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:project_live_streaming/providers/user_provider.dart';
 import 'package:project_live_streaming/resources/storage_methods.dart';
@@ -97,6 +98,35 @@ class FirestoreMethods{
       showSnackBar(context, e.message!);
     }
   }
+
+  Future<void> updateUserImage(BuildContext context, Uint8List? image) async{
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      String imageUrl = await _storageMethods.uploadUserImage(
+          'user-image', image!, userProvider.user.uid);
+      await _firestore.collection('users').doc(userProvider.user.uid).update(
+          {'image': imageUrl});
+    }catch(e){
+      e.toString();
+    }
+  }
+
+  Future<DocumentSnapshot<Map<String, dynamic>>>  getBroadcasterProfileUsername(String channelId) async {
+    DocumentSnapshot liveStreamSnapshot = await FirebaseFirestore.instance
+        .collection('livestream')
+        .doc(channelId)
+        .get();
+
+    String broadcasterUid = liveStreamSnapshot['uid'];
+
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(broadcasterUid)
+        .get();
+
+    return userSnapshot as DocumentSnapshot<Map<String, dynamic>>;
+  }
+
 
 
 }

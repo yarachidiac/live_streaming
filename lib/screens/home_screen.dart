@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_live_streaming/providers/user_provider.dart';
+import 'package:project_live_streaming/screens/profile_screen.dart';
 import 'package:project_live_streaming/screens/feed_screen.dart';
 import 'package:project_live_streaming/screens/go_live_screen.dart';
 import 'package:provider/provider.dart';
@@ -25,9 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Widget> pages = [
     const FeedScreen(),
     const GoLiveScreen(),
-    const Center(
-      child: Text('Browser'),
-    )
+    const ProfileScreen(),
   ];
 
   @override
