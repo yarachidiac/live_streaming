@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/livestream.dart';
+import '../models/post.dart';
 import '../models/user.dart';
 import '../utils/utils.dart';
 
@@ -103,7 +104,7 @@ class FirestoreMethods{
   Future<void> updateUserImage(BuildContext context, Uint8List? image) async{
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      String imageUrl = await _storageMethods.uploadUserImage(
+      String imageUrl = await _storageMethods.uploadImageStorage(
           'user-image', image!, userProvider.user.uid);
       await _firestore.collection('users').doc(userProvider.user.uid).update(
           {'image': imageUrl});
@@ -130,5 +131,30 @@ class FirestoreMethods{
   }
 
 
+  Future<String> uploadPost(String description, Uint8List file, String uid,
+      String username, String profImage) async {
+    // asking uid here because we dont want to make extra calls to firebase auth when we can just get from our state management
+    String res = "Some error occurred";
+    try {
+      String photoUrl =
+      await StorageMehtods().uploadImageToStorage('posts', file, true,uid);
+      String postId = const Uuid().v1(); // creates unique id based on time
+      Post post = Post(
+        description: description,
+        uid: uid,
+        username: username,
+        likes: [],
+        postId: postId,
+        datePublished: DateTime.now(),
+        postUrl: photoUrl,
+        profImage: profImage,
+      );
+      _firestore.collection('posts').doc(postId).set(post.toJson());
+      res = "success";
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
 
 }

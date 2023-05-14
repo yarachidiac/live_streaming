@@ -13,6 +13,9 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../resources/firestore_methods.dart';
+import '../utils/utils.dart';
+
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({Key? key}) : super(key: key);
   static String routeName = '/addPost';
@@ -30,7 +33,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
 // for picking up image from gallery
   pickImage(ImageSource source) async {
     final ImagePicker _imagePicker = ImagePicker();
-    print("hiiiiiiiiiii");
     XFile? _file = await _imagePicker.pickImage(source: source);
     if (_file != null) {
       return await _file.readAsBytes();
@@ -79,14 +81,14 @@ class _AddPostScreenState extends State<AddPostScreen> {
     );
   }
 
-  /*void postImage(String uid, String username, String profImage) async {
+  void postImage(String uid, String username, String profImage) async {
     setState(() {
       isLoading = true;
     });
     // start the loading
     try {
       // upload to storage and db
-      String res = await FireStoreMethods().uploadPost(
+      String res = await FirestoreMethods().uploadPost(
         _descriptionController.text,
         _file!,
         uid,
@@ -114,7 +116,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         err.toString(),
       );
     }
-  }*/
+  }
 
   void clearImage() {
     setState(() {
@@ -135,6 +137,38 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
     return  _file==null?
       Scaffold(
+
+          appBar: AppBar(
+            backgroundColor: buttonColor,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: (){
+                Navigator.pop(context);
+
+              },
+            ),
+            title: const Text(
+              'Post to',
+            ),
+            centerTitle: false,
+            actions: <Widget>[
+              TextButton(
+                onPressed: () =>  postImage(
+              userProvider.user.uid,
+              userProvider.user.username,
+              userProvider.user.image,
+            ),
+                child: const Text(
+                  "Post",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0),
+                ),
+              )
+            ],
+          ),
+
           body:Center(
       child: IconButton(icon:const Icon(Icons.upload),
         onPressed:()=>_selectImage(context)
@@ -145,7 +179,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
         backgroundColor: buttonColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: (){},
+          onPressed: (){
+            Navigator.pop(context);
+
+          },
         ),
         title: const Text(
           'Post to',
@@ -153,11 +190,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
         centerTitle: false,
         actions: <Widget>[
           TextButton(
-            onPressed: () => {},/* postImage(
-              userProvider.getUser.uid,
-              userProvider.getUser.username,
-              userProvider.getUser.photoUrl,
-            ),*/
+            onPressed: () => postImage(
+              userProvider.user.uid,
+              userProvider.user.username,
+              userProvider.user.image,
+            ),
             child: const Text(
               "Post",
               style: TextStyle(
@@ -180,7 +217,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               CircleAvatar(
-                  backgroundImage: userProvider.user.image==null?
+                  backgroundImage: userProvider.user.image!=null?
                   NetworkImage(
                     userProvider.user.image,
                   ):
@@ -205,11 +242,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: NetworkImage(
-                          //  userProvider.getUser.photoUrl,
-                            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgFbu1-RyOXUSMNeSoga6Xh21A2kj0kCvfPuzc3cUmhg&s"
-
-                        ),
+                        image: MemoryImage(_file!),
                         fit: BoxFit.fill,
                         alignment: FractionalOffset.topCenter,
 

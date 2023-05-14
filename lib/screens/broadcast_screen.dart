@@ -39,7 +39,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     // TODO: implement initState
     super.initState();
     _initEngine();
-  //  getBroadcasterProfileUsername();
+    getBroadcasterProfileUsername();
   }
 
   void _initEngine() async {
@@ -59,12 +59,12 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     _joinChannel();
   }
 
-  /*Future<User>getBroadcasterProfileUsername() async{
+  Future<User>getBroadcasterProfileUsername() async{
     FirestoreMethods _firestoreMethods = FirestoreMethods();
     _broadcaster = await _firestoreMethods.getBroadcasterProfileUsername(widget.channelId);
     setState(() {});
     return _broadcaster;
-  }*/
+  }
 
   String baseUrl = "https://agora-server-zc6n.onrender.com";
 
@@ -209,6 +209,13 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     ],
                   ),
                 ),
+
+              Row(
+                  children: [
+                    CircleAvatar(backgroundImage: NetworkImage(_broadcaster.image),),
+                    Text(_broadcaster.username),
+                  ],
+                  ),
               Flexible(child: Chat(channelId: widget.channelId,)),
 
 
