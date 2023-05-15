@@ -11,7 +11,7 @@ class AuthMethods{
   final _userRef = FirebaseFirestore.instance.collection('users');
   final _auth = FirebaseAuth.instance;
 
-    Future<Map<String, dynamic>?> getCurrentUser(String? uid) async{
+  Future<Map<String, dynamic>?> getCurrentUser(String? uid) async{
     if(uid != null){
       final snap = await _userRef.doc(uid).get();
       return snap.data();
@@ -26,12 +26,13 @@ class AuthMethods{
       UserCredential cred = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       if(cred.user != null){
         model.User user = model.User(
-          username: username.trim(),
-          email: email.trim(),
-          uid: cred.user!.uid,
-          image: '',
-          followers: [],
-          following: []
+            username: username.trim(),
+            email: email.trim(),
+            uid: cred.user!.uid,
+            image: '',
+            followers: [],
+            following: []
+
         );
         await _userRef.doc(cred.user!.uid).set(user.toMap());
         Provider.of<UserProvider>(context, listen: false).setUser(user);
@@ -57,5 +58,5 @@ class AuthMethods{
     }
     return res;
   }
-  
+
 }
