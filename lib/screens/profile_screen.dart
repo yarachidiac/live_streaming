@@ -6,14 +6,15 @@ import 'package:project_live_streaming/resources/firestore_methods.dart';
 import 'package:project_live_streaming/utils/colors.dart';
 import 'package:provider/provider.dart';
 
+import '../models/user.dart';
 import '../providers/user_provider.dart';
 import '../utils/utils.dart';
 import 'add_post.dart';
 
 class ProfileScreen extends StatefulWidget {
-  final String broadcasterUid;
+  final User broadcaster;
   final bool isBroadcaster;
-  ProfileScreen({Key? key, required this.broadcasterUid, required this.isBroadcaster}) : super(key: key);
+  ProfileScreen({Key? key, required this.broadcaster, required this.isBroadcaster}) : super(key: key);
 
   @override
   _ProfileScreen createState() => _ProfileScreen();
@@ -29,7 +30,7 @@ class _ProfileScreen extends State<ProfileScreen> {
     });
 
     if (isFollowing) {
-      await FirestoreMethods().followBroadcaster(widget.broadcasterUid, Provider.of<UserProvider>(context, listen: false));
+      await FirestoreMethods().followBroadcaster(widget.broadcaster.uid, Provider.of<UserProvider>(context, listen: false));
     }
 
   }
@@ -57,8 +58,8 @@ class _ProfileScreen extends State<ProfileScreen> {
                   ?  CircleAvatar(
                 radius: 50,
                 backgroundColor: Colors.white, // Change the background color here
-                backgroundImage: user.image != ""
-                    ? NetworkImage(user.image)
+                backgroundImage: widget.broadcaster.image != ""
+                    ? NetworkImage(widget.broadcaster.image)
                     : NetworkImage(
                     'https://www.vhv.rs/dpng/d/312-3120300_default-profile-hd-png-download.png'),
               )
@@ -96,7 +97,12 @@ class _ProfileScreen extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
+              widget.isBroadcaster
+             ? Text(
+                widget.broadcaster.username,
+                style: Theme.of(context).textTheme.headline6,
+              )
+              :  Text(
                 user.username,
                 style: Theme.of(context).textTheme.headline6,
               ),

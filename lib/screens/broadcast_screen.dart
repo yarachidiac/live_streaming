@@ -194,7 +194,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     child: GestureDetector(
                       onTap: () {  Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => ProfileScreen(
-                          broadcasterUid: _broadcaster.uid,
+                          broadcaster: _broadcaster,
                           isBroadcaster: true,
                         ),
                       ),);},

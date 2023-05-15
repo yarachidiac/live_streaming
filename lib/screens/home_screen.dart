@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
       const FeedScreen(),
       const GoLiveScreen(),
       const PostFeedScreen(),
-      ProfileScreen(broadcasterUid: userProvider.user.uid, isBroadcaster: false,),
+      ProfileScreen(broadcaster: userProvider.user, isBroadcaster: false,),
     ];
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
