@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_live_streaming/providers/user_provider.dart';
+import 'package:project_live_streaming/screens/post_feed_screen.dart';
 import 'package:project_live_streaming/screens/profile_screen.dart';
 import 'package:project_live_streaming/screens/feed_screen.dart';
 import 'package:project_live_streaming/screens/go_live_screen.dart';
@@ -30,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     List<Widget> pages = [
       const FeedScreen(),
       const GoLiveScreen(),
+      const PostFeedScreen(),
       ProfileScreen(broadcasterUid: userProvider.user.uid, isBroadcaster: false,),
     ];
     return Scaffold(
@@ -48,6 +50,10 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
               icon: Icon(Icons.add_rounded),
               label: 'Go Live'
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'search'
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.person),

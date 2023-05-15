@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/user_provider.dart';
 import '../utils/utils.dart';
+import 'add_post.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String broadcasterUid;
@@ -177,6 +178,11 @@ class _ProfileScreen extends State<ProfileScreen> {
                     ),
                   ),
                   onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AddPostScreen()),
+                    );
+
                   },
                   child: Text(
                     'Create Post',

@@ -218,8 +218,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
             children: <Widget>[
               CircleAvatar(
                   backgroundImage: userProvider.user.image!=null?
-                  NetworkImage(
-                    userProvider.user.image,
+                  const NetworkImage(
+                   // userProvider.user.image,
+                      "https://plus.unsplash.com/premium_photo-1666866587910-2f333c109ef7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=465&q=80"
                   ):
                   NetworkImage("https://www.vhv.rs/dpng/d/312-3120300_default-profile-hd-png-download.png"
                   )

@@ -185,7 +185,7 @@ class FirestoreMethods{
         postId: postId,
         datePublished: DateTime.now(),
         postUrl: photoUrl,
-        profImage: profImage,
+        image: profImage,
       );
       _firestore.collection('posts').doc(postId).set(post.toJson());
       res = "success";
@@ -195,5 +195,58 @@ class FirestoreMethods{
     return res;
   }
 
+
+  Future<String> likePost(String postId, String uid, List likes/*we will get the list likes men l streambuilder */) async {
+    String res = "Some error occurred";
+    try {
+      if (likes.contains(uid)) { //eza l user li eendo l uid li kabasa aa kabsit l like mawjud l uid tabaoo already bi alb likes list tabaa l post mnaamol dislike w menshilo mn l likes list else men zido w mnaamol like
+        //mawjud mnshilo
+        await _firestore.collection('posts').doc(postId).update({ //aamnfut aa collection l post wel doc postid aamna2e l post li aamyaamol action eele w update query lanzabit l list
+          'likes': FieldValue.arrayRemove([uid])             //eemlna .update laan eza bedna naamol .set bedna nsir nmari2 kel l values
+        });                                                  //aamn2ul la firebase ru7 aal likes field khod kel l list w shil bas l current uid mena
+      } else {
+        // else mezido aal likes
+        await _firestore.collection('posts').doc(postId).update({
+          'likes': FieldValue.arrayUnion([uid])
+        });
+      }
+      res = 'success';
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> postComment(String postId, String text, String uid,
+      String name, String profilePic) async {
+
+    //baatna l uid hek eza bedna bas nekbs aa esem l user men l comments nekhdo aa safhit profile tabaa l user li aamil l comment
+    String res = "Some error occurred";
+    try {
+      if (text.isNotEmpty) {
+        // if the likes list contains the user uid, we need to remove it
+        String commentId = const Uuid().v1();
+        _firestore
+            .collection('posts')
+            .doc(postId)
+            .collection('comments')
+            .doc(commentId)
+            .set({
+          'image': profilePic,
+          'name': name,
+          'uid': uid,
+          'text': text,
+          'commentId': commentId,
+          'datePublished': DateTime.now(),
+        });
+        res = 'success';
+      } else {
+        res = "Please enter text";
+      }
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
 
 }
