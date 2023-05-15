@@ -23,15 +23,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  List<Widget> pages = [
-    const FeedScreen(),
-    const GoLiveScreen(),
-    const ProfileScreen(),
-  ];
 
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    List<Widget> pages = [
+      const FeedScreen(),
+      const GoLiveScreen(),
+      ProfileScreen(broadcasterUid: userProvider.user.uid, isBroadcaster: false,),
+    ];
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: buttonColor,
@@ -50,8 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
               label: 'Go Live'
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.copy),
-              label: 'Browse'
+              icon: Icon(Icons.person),
+              label: 'Profile'
           ),
         ],
       ),

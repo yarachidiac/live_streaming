@@ -9,6 +9,7 @@ import 'package:project_live_streaming/config/appId.dart';
 import 'package:project_live_streaming/providers/user_provider.dart';
 import 'package:project_live_streaming/resources/firestore_methods.dart';
 import 'package:project_live_streaming/screens/home_screen.dart';
+import 'package:project_live_streaming/screens/profile_screen.dart';
 import 'package:project_live_streaming/widgets/chat.dart';
 import 'package:provider/provider.dart';
 import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
@@ -31,7 +32,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
   List<int> remoteUid = [];
   bool switchCamera = true;
   bool isMuted = false;
-  late DocumentSnapshot<Map<String, dynamic>> _broadcaster;
+  late User _broadcaster = User(uid: '', username: '', email: '', image: '', followers: [], following: []);
 
 
   @override
@@ -39,7 +40,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     // TODO: implement initState
     super.initState();
     _initEngine();
-    getBroadcasterProfileUsername();
+    getBroadcasterDetail();
   }
 
   void _initEngine() async {
@@ -59,13 +60,13 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     _joinChannel();
   }
 
-  getBroadcasterProfileUsername() async{
+  getBroadcasterDetail() async{
     FirestoreMethods _firestoreMethods = FirestoreMethods();
-    _broadcaster = await _firestoreMethods.getBroadcasterProfileUsername(widget.channelId);
+    _broadcaster = await _firestoreMethods.getBroadcasterDetail(widget.channelId);
     setState(() {});
   }
 
-  String baseUrl = "https://agora-tutorial-server.onrender.com";
+  String baseUrl = "https://agora-server-zc6n.onrender.com";
 
   String? token;
 
@@ -172,70 +173,113 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider
-        .of<UserProvider>(context)
-        .user;
+    final user = Provider.of<UserProvider>(context).user;
+
     return WillPopScope(
       onWillPop: () async {
         await _leaveChannel();
         return Future.value(true);
       },
       child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              _renderVideo(user),
-              if("${user.uid}${user.username}" == widget.channelId)
-                Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onTap: _switchCamera,
-                        child: Icon(Icons.switch_camera_outlined, size: 32,),
-                      ),
-                      SizedBox(width: 16.0),
-                      InkWell(
-                        onTap: onToggleMute,
-                        child: Icon(
-                          isMuted ? Icons.mic_off : Icons.mic,
-                          color: isMuted ? Colors.red : null,
-                          size: 32,
+        body: Column(
+          children: [
+            Container(
+              height: MediaQuery.of(context).size.height * 0.7,
+              child: Stack(
+                children: [
+                  _renderVideo(user),
+                  Positioned(
+                    top: 16.0,
+                    left: 16.0,
+                    child: GestureDetector(
+                      onTap: () {  Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ProfileScreen(
+                          broadcasterUid: _broadcaster.uid,
+                          isBroadcaster: true,
                         ),
-                      )
-                    ],
+                      ),);},
+                      child: CircleAvatar(
+                        backgroundImage: _broadcaster.image != ''
+                            ? NetworkImage(_broadcaster.image)
+                            : null,
+                        radius: 24.0,
+                        child: _broadcaster.image == ''
+                            ? CircularProgressIndicator()
+                            : null,
+                      ),
+                    ),
                   ),
-                ),
-              Flexible(child: Chat(channelId: widget.channelId,)),
-    if (_broadcaster.exists)
-    Text(_broadcaster.data()?['username'] ?? 'No username found')
-
-
-    ],
-          ),
+                  Positioned(
+                    top: 24.0,
+                    left: 80.0,
+                    child: Text(
+                      _broadcaster.username ?? '',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if ("${user.uid}${user.username}" == widget.channelId)
+                    Positioned(
+                      bottom: 16.0,
+                      left: 0.0,
+                      right: 0.0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          InkWell(
+                            onTap: _switchCamera,
+                            child: Icon(
+                              Icons.switch_camera_outlined,
+                              size: 32,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(width: 16.0),
+                          InkWell(
+                            onTap: onToggleMute,
+                            child: Icon(
+                              isMuted ? Icons.mic_off : Icons.mic,
+                              color: isMuted ? Colors.red : Colors.white,
+                              size: 32,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Chat(channelId: widget.channelId),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   _renderVideo(user) {
-    return AspectRatio(aspectRatio: 16 / 8,
-      child: '${user.uid}${user.username}' == widget.channelId
-          ? const RtcLocalView.SurfaceView(
-        zOrderMediaOverlay: true,
-        zOrderOnTop: true,)
-          : remoteUid.isNotEmpty ?
-      kIsWeb ?
-      RtcRemoteView.SurfaceView(uid: remoteUid[0], channelId: widget.channelId,)
-          : RtcRemoteView.TextureView(
-        uid: remoteUid[0], channelId: widget.channelId,)
-
-          : Container()
-      ,);
+    return '${user.uid}${user.username}' == widget.channelId
+        ? const RtcLocalView.SurfaceView(
+      zOrderMediaOverlay: true,
+      zOrderOnTop: true,
+    )
+        : remoteUid.isNotEmpty
+        ? kIsWeb
+        ? RtcRemoteView.SurfaceView(
+      uid: remoteUid[0],
+      channelId: widget.channelId,
+    )
+        : RtcRemoteView.TextureView(
+      uid: remoteUid[0],
+      channelId: widget.channelId,
+    )
+        : Container();
   }
-
-
 
 }

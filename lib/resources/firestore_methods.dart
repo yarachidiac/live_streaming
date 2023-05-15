@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/livestream.dart';
+import '../models/user.dart';
 import '../utils/utils.dart';
 
 
@@ -69,9 +70,9 @@ class FirestoreMethods{
     }catch(e){
       debugPrint(e.toString());
     }
-    }
+  }
 
-    //update viewers
+  //update viewers
   Future<void> updateViewCount(String channelId, bool isIncreased) async{
     try{
       await _firestore.collection('livestream').doc(channelId).update({
@@ -99,34 +100,73 @@ class FirestoreMethods{
     }
   }
 
-  Future<void> updateUserImage(BuildContext context, Uint8List? image) async{
+  Future<String> updateUserImage(BuildContext context, Uint8List? image) async{
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      String imageUrl = await _storageMethods.uploadUserImage(
+      String imageUrl = await _storageMethods.uploadImageStorage(
           'user-image', image!, userProvider.user.uid);
       await _firestore.collection('users').doc(userProvider.user.uid).update(
           {'image': imageUrl});
+      return imageUrl;
+
     }catch(e){
       e.toString();
+      return '';
     }
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>>  getBroadcasterProfileUsername(String channelId) async {
-    DocumentSnapshot liveStreamSnapshot = await FirebaseFirestore.instance
+  Future<User> getBroadcasterDetail(String channelId) async {
+    DocumentSnapshot liveStreamSnapshot = await _firestore
         .collection('livestream')
         .doc(channelId)
         .get();
 
     String broadcasterUid = liveStreamSnapshot['uid'];
 
-    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+    DocumentSnapshot userSnapshot = await _firestore
         .collection('users')
         .doc(broadcasterUid)
         .get();
 
-    return userSnapshot as DocumentSnapshot<Map<String, dynamic>>;
+    User user = User.fromMap(userSnapshot.data()! as Map<String, dynamic>);
+    return user;
   }
 
+  Future<void> followBroadcaster(String broadcasterUid, UserProvider userProvider) async {
+    // Add broadcasterUid to the following list of the logged-in user
+    await _firestore
+        .collection('users')
+        .doc(userProvider.user.uid)
+        .update({
+      'following': FieldValue.arrayUnion([broadcasterUid])
+    });
+
+    // Add logged-in user's uid to the followers list of the broadcaster
+    await _firestore
+        .collection('users')
+        .doc(broadcasterUid)
+        .update({
+      'followers': FieldValue.arrayUnion([userProvider.user.uid])
+    });
+  }
+
+  Future<void> unfollowBroadcaster(String broadcasterUid, UserProvider userProvider) async {
+    try {
+      // Remove the broadcaster's UID from the logged-in user's following list
+      final following = List<String>.from(userProvider.user.following)..remove(broadcasterUid);
+      await _firestore
+          .collection('users').doc(userProvider.user.uid).update({'following': following});
+
+      // Remove the logged-in user's UID from the broadcaster's followers list
+      final broadcaster = await _firestore
+          .collection('users').doc(broadcasterUid).get();
+      final followers = List<String>.from(broadcaster['followers'])..remove(userProvider.user.uid);
+      await _firestore
+          .collection('users').doc(broadcasterUid).update({'followers': followers});
+    } catch (error) {
+      print('Error unfollowing broadcaster: $error');
+    }
+  }
 
 
 }

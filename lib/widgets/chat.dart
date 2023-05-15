@@ -66,10 +66,13 @@ class _ChatState extends State<Chat> {
               Flexible(child: CustomTextField(controller: _chatController,)),
               IconButton(
                   onPressed: () {
-                    FirestoreMethods().chat(_chatController.text, widget.channelId, context);
-                    setState(() {
-                      _chatController.text = '';
-                    });
+                    if(_chatController.text != '') {
+                      FirestoreMethods().chat(
+                          _chatController.text, widget.channelId, context);
+                      setState(() {
+                        _chatController.text = '';
+                      });
+                    }
                   },
                   icon: Icon(Icons.send))
             ],

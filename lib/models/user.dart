@@ -2,7 +2,7 @@ class User{
   final String uid;
   final String username;
   final String email;
-  final String image;
+  late String image;
   final List<String> followers;
   final List<String> following;
 
