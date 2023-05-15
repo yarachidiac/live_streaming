@@ -52,22 +52,21 @@ class _PostCardState extends State<PostCard> {
     setState(() {});
   }
 
-  /*deletePost(String postId) async {
+  deletePost(String postId) async {
     try {
-      await FireStoreMethods().deletePost(postId);
+      await FirestoreMethods().deletePost(postId);
     } catch (err) {
       showSnackBar(
         context,
         err.toString(),
       );
     }
-  }*/
+  }
 
   @override
   Widget build(BuildContext context) {
     final model.User user = Provider.of<UserProvider>(context).user;
     final width = MediaQuery.of(context).size.width;
-    print(widget.snap['image'].toString());
 
     return Container(
       // boundary needed for web
@@ -141,10 +140,14 @@ class _PostCardState extends State<PostCard> {
                                       child: Text(e),
                                     ),
                                     onTap: () {
-                                      /*deletePost(
+                                      widget.snap['uid']==user.uid?
+                                      deletePost(
                                         widget.snap['postId']
                                             .toString(),
-                                      );*/
+                                      ):  showSnackBar(
+                                        context,
+                                        'Not the owner!',
+                                      );
                                       // remove the dialog box
                                       Navigator.of(context).pop();
                                     }),
@@ -302,13 +305,13 @@ class _PostCardState extends State<PostCard> {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 4),
                   ),
-                  onTap: () =>{} /*Navigator.of(context).push(
+                  onTap: () =>Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => CommentsScreen(
                         postId: widget.snap['postId'].toString(),
                       ),
                     ),
-                  ),*/
+                  ),
                 ),
                 Container(
                   child: Text(

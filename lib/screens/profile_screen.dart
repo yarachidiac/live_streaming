@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:project_live_streaming/resources/firestore_methods.dart';
 import 'package:project_live_streaming/utils/colors.dart';
@@ -9,10 +11,11 @@ import 'package:provider/provider.dart';
 import '../models/user.dart';
 import '../providers/user_provider.dart';
 import '../utils/utils.dart';
+import '../widgets/post_card.dart';
 import 'add_post.dart';
 
 class ProfileScreen extends StatefulWidget {
-  final User broadcaster;
+  final  broadcaster;
   final bool isBroadcaster;
   ProfileScreen({Key? key, required this.broadcaster, required this.isBroadcaster}) : super(key: key);
 
@@ -24,15 +27,38 @@ class _ProfileScreen extends State<ProfileScreen> {
   bool isFollowing = false;
   bool isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    fetchFollowingStatus();
+  }
+
+  void fetchFollowingStatus() async {
+
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final following = List<String>.from(userProvider.user.following);
+      final broadcasterUid = widget.broadcaster.uid;
+
+      if (following.contains(broadcasterUid)) {
+        setState(() {
+          isFollowing = true;
+        });
+      }
+    } catch (error) {
+      print('Error fetching following status: $error');
+    }
+  }
+
   void toggleFollowing() async{
     setState(() {
       isFollowing = !isFollowing;
     });
-
     if (isFollowing) {
       await FirestoreMethods().followBroadcaster(widget.broadcaster.uid, Provider.of<UserProvider>(context, listen: false));
+    }else {
+      await FirestoreMethods().unfollowBroadcaster(widget.broadcaster.uid, Provider.of<UserProvider>(context, listen: false));
     }
-
   }
 
   @override
@@ -98,11 +124,11 @@ class _ProfileScreen extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
               widget.isBroadcaster
-             ? Text(
+                  ? Text(
                 widget.broadcaster.username,
                 style: Theme.of(context).textTheme.headline6,
               )
-              :  Text(
+                  :  Text(
                 user.username,
                 style: Theme.of(context).textTheme.headline6,
               ),
@@ -113,7 +139,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                   Column(
                     children: [
                       Text(
-                        user.followers.toString(),
+                        '0',
                         style: Theme.of(context).textTheme.headline6,
                       ),
                       const SizedBox(height: 8),
@@ -126,7 +152,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                   Column(
                     children: [
                       Text(
-                        user.following.toString(),
+                        '0',
                         style: Theme.of(context).textTheme.headline6,
                       ),
                       const SizedBox(height: 8),
@@ -173,33 +199,78 @@ class _ProfileScreen extends State<ProfileScreen> {
 
 
           widget.isBroadcaster
-          ? Container()
-          : Center(
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> states) {
-                        return buttonColor;
-                      },
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const AddPostScreen()),
-                    );
-
+              ? Container()
+              : Center(
+            child: ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return buttonColor;
                   },
-                  child: Text(
-                    'Create Post',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18.0,
+                ),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddPostScreen()),
+                );
+
+              },
+              child: Text(
+                'Create Post',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18.0,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('posts')
+                //  .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                  .orderBy('datePublished', descending: true)
+                  .snapshots(),
+              builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return
+                snapshot.hasData?
+                 ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+
+                  itemBuilder: (ctx, index) => Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.9),
+                            blurRadius: 2.0,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: PostCard(
+                        snap: snapshot.data!.docs[index].data(),
+                      ),
                     ),
                   ),
-                ),
+                ):
+                 Center(child:Text(""));
+
+              },
+            ),
           ),
         ],
+
+
       ),
     );
   }

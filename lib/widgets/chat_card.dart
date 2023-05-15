@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-class CommentCard extends StatelessWidget {
+import '../models/user.dart';
+import '../providers/user_provider.dart';
+
+class ChatCard extends StatelessWidget {
   final snap;
-  const CommentCard({Key? key, required this.snap}) : super(key: key);
+  final String image;
+  const ChatCard({Key? key, required this.snap,required this.image}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final User user = Provider.of<UserProvider>(context).user;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
@@ -14,7 +20,7 @@ class CommentCard extends StatelessWidget {
         children: [
           CircleAvatar(
             backgroundImage: NetworkImage(
-              snap.data()['image'],
+              image ?? '',
             ),
             radius: 18,
           ),
@@ -30,21 +36,11 @@ class CommentCard extends StatelessWidget {
 
                   Row(
                     children: [
-                      Text( snap.data()['name'],style:  const TextStyle(fontWeight: FontWeight.bold,),),
-                      Expanded(child: Text(' ${snap.data()['text']}'))
+                      Text( snap.data()['username'] ?? '',style:  const TextStyle(fontWeight: FontWeight.bold,),),
+    Expanded(child: Text(' ${snap.data()['message']}' ?? ''),)
                     ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                    snap.data()['datePublished'] != null
-                          ? DateFormat.yMMMd().format(snap.data()['datePublished'].toDate())
-                          : 'N/A',
 
-                      style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w400,),
-                    ),
-                  )
                 ],
               ),
             ),

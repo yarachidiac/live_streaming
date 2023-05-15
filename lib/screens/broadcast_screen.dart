@@ -174,6 +174,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
 
     return WillPopScope(
       onWillPop: () async {
@@ -181,10 +183,11 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
         return Future.value(true);
       },
       child: Scaffold(
+
         body: Column(
           children: [
             Container(
-              height: MediaQuery.of(context).size.height * 0.7,
+              height: (MediaQuery.of(context).size.height * 0.7)-keyboardHeight,
               child: Stack(
                 children: [
                   _renderVideo(user),

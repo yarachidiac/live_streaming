@@ -63,6 +63,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
             .collection('posts')
             .doc(widget.postId)
             .collection('comments')
+            .orderBy('datePublished', descending: true)
             .snapshots(),
         builder: (context,
             AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
@@ -72,12 +73,26 @@ class _CommentsScreenState extends State<CommentsScreen> {
             );
           }
 
-          return ListView.builder(
+          return ListView.separated(
             itemCount: snapshot.data!.docs.length,
+            separatorBuilder: (context, index) => Row(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    height: 1,
+                    color: Colors.grey.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
             itemBuilder: (ctx, index) => CommentCard(
               snap: snapshot.data!.docs[index],
             ),
           );
+
+
         },
       ),
       // text input
@@ -111,6 +126,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                   user.username,
                   user.image,
                 ),
+
                 child: Container(
                   padding:
                   const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
