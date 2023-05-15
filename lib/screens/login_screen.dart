@@ -3,6 +3,7 @@ import 'package:project_live_streaming/resources/auth_methods.dart';
 import 'package:project_live_streaming/screens/home_screen.dart';
 import 'package:project_live_streaming/widgets/loading_indicator.dart';
 
+import '../utils/colors.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_textfield.dart';
 
@@ -20,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   AuthMethods _authMethods = AuthMethods();
 
   bool _isLoading = false;
+  bool _obscureText = true;
 
   @override
   void dispose() {
@@ -51,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
         title: Text('Login'),
       ),
       body: _isLoading ? const LoadingIndicator()
-      : SingleChildScrollView(
+          : SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0),
           child: Column(
@@ -74,7 +76,36 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: CustomTextField(controller: _passwordController),
+                child: TextField(
+                  controller: _passwordController,
+                  obscureText: _obscureText,
+                  decoration: InputDecoration(
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: buttonColor,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: secondaryBackgroundColor,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureText ? Icons.visibility : Icons.visibility_off,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 20,),
 

@@ -3,6 +3,7 @@ import 'package:project_live_streaming/resources/auth_methods.dart';
 import 'package:project_live_streaming/screens/home_screen.dart';
 import 'package:project_live_streaming/widgets/custom_button.dart';
 
+import '../utils/colors.dart';
 import '../widgets/custom_textfield.dart';
 import '../widgets/loading_indicator.dart';
 
@@ -20,6 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _usernameController = TextEditingController();
   AuthMethods _authMethods = AuthMethods();
   bool _isLoading = false;
+  bool _obscureText = true;
 
   @override
   void dispose() {
@@ -86,12 +88,40 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: CustomTextField(controller: _passwordController),
+                child: TextField(
+                  controller: _passwordController,
+                  obscureText: _obscureText,
+                  decoration: InputDecoration(
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: buttonColor,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: secondaryBackgroundColor,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureText ? Icons.visibility : Icons.visibility_off,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 20,),
 
               CustomButton(onTap: signUpUser, text: 'Sign Up')
-
             ],
           ),
         ),

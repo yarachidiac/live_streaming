@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:project_live_streaming/resources/firestore_methods.dart';
 import 'package:project_live_streaming/utils/colors.dart';
@@ -15,7 +14,7 @@ import '../widgets/post_card.dart';
 import 'add_post.dart';
 
 class ProfileScreen extends StatefulWidget {
-  final  broadcaster;
+  final User broadcaster;
   final bool isBroadcaster;
   ProfileScreen({Key? key, required this.broadcaster, required this.isBroadcaster}) : super(key: key);
 
@@ -24,41 +23,45 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreen extends State<ProfileScreen> {
-  bool isFollowing = false;
+  var broadcastData = {};
+  int followers = 0;
+  int following = 0;
   bool isLoading = false;
+  bool isFollowing = false;
 
   @override
   void initState() {
     super.initState();
-    fetchFollowingStatus();
+    getData();
   }
 
-  void fetchFollowingStatus() async {
-
-    try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final following = List<String>.from(userProvider.user.following);
-      final broadcasterUid = widget.broadcaster.uid;
-
-      if (following.contains(broadcasterUid)) {
-        setState(() {
-          isFollowing = true;
-        });
-      }
-    } catch (error) {
-      print('Error fetching following status: $error');
-    }
-  }
-
-  void toggleFollowing() async{
+  getData() async {
     setState(() {
-      isFollowing = !isFollowing;
+      isLoading = true;
     });
-    if (isFollowing) {
-      await FirestoreMethods().followBroadcaster(widget.broadcaster.uid, Provider.of<UserProvider>(context, listen: false));
-    }else {
-      await FirestoreMethods().unfollowBroadcaster(widget.broadcaster.uid, Provider.of<UserProvider>(context, listen: false));
+    try {
+      var broadcastSnap = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.broadcaster.uid)
+          .get();
+
+
+      broadcastData = broadcastSnap.data()!;
+      followers = broadcastSnap.data()!['followers'].length;
+      following = broadcastSnap.data()!['following'].length;
+      isFollowing = broadcastSnap
+          .data()!['followers']
+          .contains(Provider.of<UserProvider>(context, listen: false).user.uid);
+      setState(() {});
+    } catch (e) {
+      showSnackBar(
+        context,
+        e.toString(),
+      );
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -68,6 +71,7 @@ class _ProfileScreen extends State<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text('Profile', style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 22
@@ -133,13 +137,14 @@ class _ProfileScreen extends State<ProfileScreen> {
                 style: Theme.of(context).textTheme.headline6,
               ),
               const SizedBox(height: 8),
-              Row(
+
+               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Column(
                     children: [
                       Text(
-                        '0',
+                         '$followers' ,
                         style: Theme.of(context).textTheme.headline6,
                       ),
                       const SizedBox(height: 8),
@@ -152,7 +157,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                   Column(
                     children: [
                       Text(
-                        '0',
+                        '$following',
                         style: Theme.of(context).textTheme.headline6,
                       ),
                       const SizedBox(height: 8),
@@ -164,36 +169,73 @@ class _ProfileScreen extends State<ProfileScreen> {
                     ],
                   ),
                 ],
-              ),
+              )
+
             ],
           ),
           const SizedBox(height: 16),
 
           widget.isBroadcaster
               ? Center(
-            child: ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                    return buttonColor;
-                  },
-                ),
-              ),
-              onPressed: toggleFollowing,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.person_add),
-                  const SizedBox(width: 8),
-                  Text(isFollowing ? 'Unfollow' : 'Follow',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18.0,
-                    ),
+              child: isFollowing
+                  ? ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                      return buttonColor;
+                    },
                   ),
-                ],
-              ),
-            ),
+                ),
+                onPressed: () async{
+                  await FirestoreMethods().followBroadcaster(widget.broadcaster.uid, Provider.of<UserProvider>(context, listen: false));
+                  setState(() {
+                    isFollowing = false;
+                    followers--;
+                  });
+                },
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.person_add),
+                    SizedBox(width: 8),
+                    Text("Unfollow",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18.0,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+                  :ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                      return buttonColor;
+                    },
+                  ),
+                ),
+                onPressed:  () async{
+                  await FirestoreMethods().followBroadcaster(widget.broadcaster.uid, Provider.of<UserProvider>(context, listen: false));
+                  setState(() {
+                    isFollowing = true;
+                    followers++;
+                  });
+                },
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.person_add),
+                    SizedBox(width: 8),
+                    Text('Follow',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18.0,
+                      ),
+                    ),
+                  ],
+                ),
+              )
           )
               : Container(),
 
@@ -229,7 +271,7 @@ class _ProfileScreen extends State<ProfileScreen> {
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection('posts')
-                //  .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                  .where('uid', isEqualTo:user.uid)
                   .orderBy('datePublished', descending: true)
                   .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
@@ -239,38 +281,36 @@ class _ProfileScreen extends State<ProfileScreen> {
                   );
                 }
                 return
-                snapshot.hasData?
-                 ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
+                  snapshot.hasData?
+                  ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
 
-                  itemBuilder: (ctx, index) => Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.9),
-                            blurRadius: 2.0,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: PostCard(
-                        snap: snapshot.data!.docs[index].data(),
+                    itemBuilder: (ctx, index) => Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.9),
+                              blurRadius: 2.0,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: PostCard(
+                          snap: snapshot.data!.docs[index].data(),
+                        ),
                       ),
                     ),
-                  ),
-                ):
-                 Center(child:Text(""));
+                  ):
+                  Center(child:Text(""));
 
               },
             ),
           ),
         ],
-
-
       ),
     );
   }

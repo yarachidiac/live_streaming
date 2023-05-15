@@ -133,39 +133,34 @@ class FirestoreMethods{
     return user;
   }
 
-  Future<void> followBroadcaster(String broadcasterUid, UserProvider userProvider) async {
-    // Add broadcasterUid to the following list of the logged-in user
-    await _firestore
-        .collection('users')
-        .doc(userProvider.user.uid)
-        .update({
-      'following': FieldValue.arrayUnion([broadcasterUid])
-    });
-
-    // Add logged-in user's uid to the followers list of the broadcaster
-    await _firestore
-        .collection('users')
-        .doc(broadcasterUid)
-        .update({
-      'followers': FieldValue.arrayUnion([userProvider.user.uid])
-    });
-  }
-
-  Future<void> unfollowBroadcaster(String broadcasterUid, UserProvider userProvider) async {
+  Future<void> followBroadcaster(
+      String broadcasterUid,
+      UserProvider userProvider
+      ) async {
     try {
-      // Remove the broadcaster's UID from the logged-in user's following list
-      final following = List<String>.from(userProvider.user.following)..remove(broadcasterUid);
-      await _firestore
-          .collection('users').doc(userProvider.user.uid).update({'following': following});
+      DocumentSnapshot snap = await _firestore.collection('users').doc(userProvider.user.uid).get();
+      List following = (snap.data()! as dynamic)['following'];
 
-      // Remove the logged-in user's UID from the broadcaster's followers list
-      final broadcaster = await _firestore
-          .collection('users').doc(broadcasterUid).get();
-      final followers = List<String>.from(broadcaster['followers'])..remove(userProvider.user.uid);
-      await _firestore
-          .collection('users').doc(broadcasterUid).update({'followers': followers});
-    } catch (error) {
-      print('Error unfollowing broadcaster: $error');
+      if(following.contains(broadcasterUid)) {
+        await _firestore.collection('users').doc(broadcasterUid).update({
+          'followers': FieldValue.arrayRemove([userProvider.user.uid])
+        });
+
+        await _firestore.collection('users').doc(userProvider.user.uid).update({
+          'following': FieldValue.arrayRemove([broadcasterUid])
+        });
+      } else {
+        await _firestore.collection('users').doc(broadcasterUid).update({
+          'followers': FieldValue.arrayUnion([userProvider.user.uid])
+        });
+
+        await _firestore.collection('users').doc(userProvider.user.uid).update({
+          'following': FieldValue.arrayUnion([broadcasterUid])
+        });
+      }
+
+    } catch(e) {
+      print(e.toString());
     }
   }
 
