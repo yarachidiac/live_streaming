@@ -38,7 +38,7 @@ class _ChatState extends State<Chat> {
                   .collection('livestream')
                   .doc(widget.channelId)
                   .collection('comments')
-                  .orderBy('startedAt', descending: true)
+                  .orderBy('createdAt', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
                 if(snapshot.connectionState == ConnectionState.waiting){

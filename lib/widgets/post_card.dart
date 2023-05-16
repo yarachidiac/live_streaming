@@ -91,9 +91,14 @@ class _PostCardState extends State<PostCard> {
               children: <Widget>[
                  CircleAvatar(
                   radius: 16,
-                  backgroundImage: NetworkImage(//widget.snap['postUrl'].toString()
-                      widget.snap['image'].toString()
-                  ),
+                  backgroundImage:
+                    //widget.snap['postUrl'].toString()
+                      widget.snap['image']!=""?
+                      NetworkImage(widget.snap['image'].toString())
+                          : NetworkImage(
+                          'https://www.vhv.rs/dpng/d/312-3120300_default-profile-hd-png-download.png'),
+
+
                 ),
 
                 Expanded(
@@ -243,11 +248,11 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
               ),
-              IconButton(
+              /*IconButton(
                   icon: const Icon(
                     Icons.share_outlined,
                   ),
-                  onPressed: () {}),
+                  onPressed: () {}),*/
               /*Expanded(
                   child: Align(
                     alignment: Alignment.bottomRight,

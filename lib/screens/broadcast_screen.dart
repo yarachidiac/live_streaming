@@ -204,7 +204,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                       child: CircleAvatar(
                         backgroundImage: _broadcaster.image != ''
                             ? NetworkImage(_broadcaster.image)
-                            : null,
+                            : NetworkImage(
+                            'https://www.vhv.rs/dpng/d/312-3120300_default-profile-hd-png-download.png'),
                         radius: 24.0,
                         child: _broadcaster.image == ''
                             ? CircularProgressIndicator()

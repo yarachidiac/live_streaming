@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:project_live_streaming/resources/firestore_methods.dart';
 import 'package:project_live_streaming/utils/colors.dart';
@@ -14,7 +15,7 @@ import '../widgets/post_card.dart';
 import 'add_post.dart';
 
 class ProfileScreen extends StatefulWidget {
-  final User broadcaster;
+  final broadcaster;
   final bool isBroadcaster;
   ProfileScreen({Key? key, required this.broadcaster, required this.isBroadcaster}) : super(key: key);
 
@@ -137,14 +138,13 @@ class _ProfileScreen extends State<ProfileScreen> {
                 style: Theme.of(context).textTheme.headline6,
               ),
               const SizedBox(height: 8),
-
-               Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Column(
                     children: [
                       Text(
-                         '$followers' ,
+                        '$followers' ,
                         style: Theme.of(context).textTheme.headline6,
                       ),
                       const SizedBox(height: 8),
@@ -169,8 +169,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                     ],
                   ),
                 ],
-              )
-
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -267,50 +266,56 @@ class _ProfileScreen extends State<ProfileScreen> {
               ),
             ),
           ),
-          Expanded(
-            child: StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection('posts')
-                  .where('uid', isEqualTo:user.uid)
-                  .orderBy('datePublished', descending: true)
-                  .snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                return
-                  snapshot.hasData?
-                  ListView.builder(
-                    itemCount: snapshot.data!.docs.length,
+          const Divider(),
+          Expanded(child:
+          StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('posts')
+                .where('uid', isEqualTo: widget.broadcaster.uid)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              return
+                snapshot.hasData?
+                ListView.builder(
+                    itemCount: (snapshot.data! as dynamic).docs.length,
 
-                    itemBuilder: (ctx, index) => Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.9),
-                              blurRadius: 2.0,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
+                    itemBuilder: (ctx, index) {
+                      DocumentSnapshot snap =
+                      (snapshot.data! as dynamic).docs[index];
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.9),
+                                blurRadius: 2.0,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: PostCard(
+                            snap: (snapshot.data! as dynamic).docs[index],
+                          ),
                         ),
-                        child: PostCard(
-                          snap: snapshot.data!.docs[index].data(),
-                        ),
-                      ),
-                    ),
-                  ):
-                  Center(child:Text(""));
+                      );
+                    }
+                ):
+                Center(child:Text(""));
 
-              },
-            ),
+            },
+          ),
           ),
         ],
+
+
       ),
     );
   }

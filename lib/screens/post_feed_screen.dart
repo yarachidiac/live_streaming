@@ -27,7 +27,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<UserProvider>(context).user;
+    final userP = Provider.of<UserProvider>(context).user;
 
     final width = MediaQuery.of(context).size.width;
 
@@ -99,12 +99,19 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
               final user = userList[index];
 
               return ListTile(
-                onTap: () => Navigator.of(context).push(
+                onTap:
+                    () =>
+                    Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => ProfileScreen(
+                    builder: (context) =>
+                    user.uid==userP.uid?
+                        ProfileScreen(
+                      broadcaster: user,
+                      isBroadcaster: false,
+                    ): ProfileScreen(
                       broadcaster: user,
                       isBroadcaster: true,
-                    ),
+                    )
                   ),
                 ),
                 leading: CircleAvatar(
