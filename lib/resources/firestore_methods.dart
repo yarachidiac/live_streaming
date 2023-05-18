@@ -84,22 +84,41 @@ class FirestoreMethods{
     }
   }
 
-  Future<void> chat(String text, String channelId, BuildContext context) async {
+  Future<void> chat(String text, String channelId, String filePath, String fileName, BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
       String commentId = Uuid().v1();
-      await _firestore.collection('livestream').doc(channelId).collection('comments')
-          .doc(commentId).set({
-        'username': userProvider.user.username,
-        'message': text,
-        'uid': userProvider.user.uid,
-        'createdAt': DateTime.now(),
-        'commentId': commentId,
-      });
+
+      if(filePath != ''){
+        // Upload the file to Firebase Storage and get the download URL
+        String downloadUrl = await _storageMethods.uploadFileToStorage(filePath, fileName);
+        await _firestore.collection('livestream').doc(channelId).collection('comments')
+            .doc(commentId).set({
+          'username': userProvider.user.username,
+          'message': text,
+          'uid': userProvider.user.uid,
+          'createdAt': DateTime.now(),
+          'commentId': commentId,
+          'fileUrl': downloadUrl, // Add the file URL field
+          'fileName': fileName, // Add the fileName field
+        });
+
+      }else{
+        await _firestore.collection('livestream').doc(channelId).collection('comments')
+            .doc(commentId).set({
+          'username': userProvider.user.username,
+          'message': text,
+          'uid': userProvider.user.uid,
+          'createdAt': DateTime.now(),
+          'commentId': commentId,
+        });
+      }
+
     } on FirebaseException catch (e) {
       showSnackBar(context, e.message!);
     }
   }
+
 
   Future<String> updateUserImage(BuildContext context, Uint8List? image) async{
     try {
@@ -254,5 +273,6 @@ class FirestoreMethods{
     }
     return res;
   }
+
 
 }

@@ -123,6 +123,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
     ));
   }
 
+
   void _joinChannel() async {
     await getToken();
     if (defaultTargetPlatform == TargetPlatform.android) {
@@ -195,12 +196,16 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                     top: 16.0,
                     left: 16.0,
                     child: GestureDetector(
-                      onTap: () {  Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => ProfileScreen(
-                          broadcaster: _broadcaster,
-                          isBroadcaster: true,
-                        ),
-                      ),);},
+                      onTap: () {
+                        if (!widget.isBroadcaster) {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => ProfileScreen(
+                              broadcaster: _broadcaster,
+                              isBroadcaster: true,
+                            ),
+                          ));
+                        }
+                      },
                       child: CircleAvatar(
                         backgroundImage: _broadcaster.image != ''
                             ? NetworkImage(_broadcaster.image)
@@ -270,7 +275,7 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
   _renderVideo(user) {
     return '${user.uid}${user.username}' == widget.channelId
         ? const RtcLocalView.SurfaceView(
-      zOrderMediaOverlay: true,
+        zOrderMediaOverlay: true,
       zOrderOnTop: true,
     )
         : remoteUid.isNotEmpty

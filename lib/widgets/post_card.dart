@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:project_live_streaming/models/user.dart' as model;
 import 'package:project_live_streaming/providers/user_provider.dart';
 import 'package:project_live_streaming/resources/firestore_methods.dart';
@@ -293,7 +294,7 @@ class _PostCardState extends State<PostCard> {
                           ),
                         ),
                         TextSpan(
-                          text: ' ${widget.snap['description']}',
+                          //text: Html(data: widget.snap['description'] ?? '',),
                         ),
                       ],
                     ),

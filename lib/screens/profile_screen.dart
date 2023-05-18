@@ -309,7 +309,6 @@ class _ProfileScreen extends State<ProfileScreen> {
                     }
                 ):
                 Center(child:Text(""));
-
             },
           ),
           ),

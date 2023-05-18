@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -39,6 +40,23 @@ class StorageMehtods{
   }
 
 
+  // Function to upload file to Firebase Storage
+  Future<String> uploadFileToStorage(String filePath, String fileName) async {
+    // Create a reference to the Firebase Storage bucket
+    Reference storageRef = _storage.ref().child('files');
+
+    // Upload the file to Firebase Storage
+    UploadTask uploadTask = storageRef.child(fileName).putFile(File(filePath));
+
+    // Await the completion of the upload task
+    TaskSnapshot taskSnapshot = await uploadTask;
+
+    // Get the download URL of the uploaded file
+    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+
+    // Return the download URL
+    return downloadUrl;
+  }
 
 
 }
