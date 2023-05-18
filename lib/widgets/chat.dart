@@ -76,6 +76,8 @@ class _ChatState extends State<Chat> {
                 if (!snapshot.hasData || snapshot.data.docs.isEmpty) {
                   return const SizedBox(); // Return an empty widget if there is no data
                 }
+
+
                 return ListView.separated(
                     itemCount: snapshot.data.docs.length,
                     separatorBuilder: (context, index) => Row(

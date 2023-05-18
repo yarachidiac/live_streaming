@@ -12,6 +12,7 @@ import '../models/user.dart';
 import '../providers/user_provider.dart';
 import '../utils/utils.dart';
 import '../widgets/post_card.dart';
+import '../widgets/voice_card.dart';
 import 'add_post.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -287,7 +288,11 @@ class _ProfileScreen extends State<ProfileScreen> {
                     itemBuilder: (ctx, index) {
                       DocumentSnapshot snap =
                       (snapshot.data! as dynamic).docs[index];
-                      return Padding(
+
+
+
+                      return snap['isVoice']==false?
+                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                         child: Container(
                           decoration: BoxDecoration(
@@ -303,6 +308,26 @@ class _ProfileScreen extends State<ProfileScreen> {
                           ),
                           child: PostCard(
                             snap: (snapshot.data! as dynamic).docs[index],
+                          ),
+                        ),
+                      ):
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.9),
+                                blurRadius: 2.0,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: VoiceCard(
+                            snap
+                                : (snapshot.data! as dynamic).docs[index].data(),
                           ),
                         ),
                       );

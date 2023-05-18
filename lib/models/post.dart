@@ -9,6 +9,8 @@ class Post {
   final DateTime datePublished;
   final String postUrl;
   final String image;
+  final bool isVoice;
+  final String VoiceUrl;
 
   const Post(
       {required this.description,
@@ -19,6 +21,9 @@ class Post {
         required this.datePublished,
         required this.postUrl,
         required this.image,
+        required this.isVoice,
+        required this.VoiceUrl,
+
       });
 
   static Post fromSnap(DocumentSnapshot snap) {
@@ -32,7 +37,9 @@ class Post {
         datePublished: snapshot["datePublished"],
         username: snapshot["username"],
         postUrl: snapshot['postUrl'],
-        image: snapshot['image']
+        image: snapshot['image'],
+        isVoice:snapshot['isVoice'],
+      VoiceUrl:snapshot['VoiceUrl']
     );
   }
 
@@ -44,6 +51,8 @@ class Post {
     "postId": postId,
     "datePublished": datePublished,
     'postUrl': postUrl,
-    'image': image
+    'image': image,
+    'isVoice':isVoice,
+    'VoiceUrl':VoiceUrl,
   };
 }

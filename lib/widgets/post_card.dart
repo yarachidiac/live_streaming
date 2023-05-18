@@ -69,6 +69,7 @@ class _PostCardState extends State<PostCard> {
     final model.User user = Provider.of<UserProvider>(context).user;
     final width = MediaQuery.of(context).size.width;
 
+
     return Container(
       // boundary needed for web
       decoration: BoxDecoration(
@@ -300,10 +301,16 @@ class _PostCardState extends State<PostCard> {
                     ),
                   ),
                 ),
+                Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+
+                    child: Html(data: '''${widget.snap['description'].toString()}''')),
+                //'''<p color="blue"></p>'''
+
                 InkWell(
                   child: Container(
                     child: Text(
-                      'View all $commentLen comments',
+                      'View all comments',
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.grey,

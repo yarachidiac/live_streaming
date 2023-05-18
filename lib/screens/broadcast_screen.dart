@@ -4,6 +4,7 @@ import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:project_live_streaming/config/appId.dart';
 import 'package:project_live_streaming/providers/user_provider.dart';
@@ -15,13 +16,25 @@ import 'package:provider/provider.dart';
 import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
 import 'package:agora_rtc_engine/rtc_remote_view.dart' as RtcRemoteView;
 import 'package:http/http.dart' as http;
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:agora_rtc_engine/rtc_engine.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:uuid/uuid.dart';
 
+
+
+
+import '../models/post.dart';
 import '../models/user.dart';
 
 class BroadcastScreen extends StatefulWidget {
   final bool isBroadcaster;
   final String channelId;
   const BroadcastScreen({Key? key, required this.isBroadcaster, required this.channelId}) : super(key: key);
+
 
   @override
   State<BroadcastScreen> createState() => _BroadcastScreenState();
@@ -33,15 +46,118 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
   bool switchCamera = true;
   bool isMuted = false;
   late User _broadcaster = User(uid: '', username: '', email: '', image: '', followers: [], following: []);
-
+  bool _isRecording = false;
+  late String _recordingFilePath;
+  late String _recordingPath;
+  final firebase_storage.FirebaseStorage _storage = firebase_storage.FirebaseStorage.instance;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _initEngine();
+
     getBroadcasterDetail();
   }
+  Future<void> _requestPermissions() async {
+    await Permission.microphone.request();
+    await Permission.storage.request();
+  }
+
+
+
+  Future<void> _toggleRecording() async {
+    setState(() {
+      _isRecording = !_isRecording;
+      print(_isRecording);
+      print("mmmmmmmmmmmmmmmmmmmmmmmmm");
+    });
+
+    if (_isRecording) {
+      // Start recording
+      await _requestPermissions();
+
+      final appDocDir = await path_provider.getApplicationDocumentsDirectory();
+      _recordingFilePath = '${appDocDir.path}/recording.aac';
+      await _engine.startAudioRecording(
+        _recordingFilePath,
+        AudioSampleRateType.Type32000,
+        AudioRecordingQuality.Low,
+      );
+      print("heyyyyyyyyyyyyyy balshhhhh");
+    } else {
+      // Stop recording
+      await _engine.stopAudioRecording();
+
+      // Upload the recorded file to Firebase Storage
+      final file = File(_recordingFilePath);
+      final reference =
+      _storage.ref().child('recordings/${DateTime.now().millisecondsSinceEpoch}.aac');
+
+      try {
+        await reference.putFile(file);
+        final downloadURL = await reference.getDownloadURL();
+
+        // Save the download URL to Firestore or perform any necessary operations
+      /*  String recordingId = const Uuid().v1();
+        await FirebaseFirestore.instance
+            .collection('recordings').doc(recordingId)
+            .set({'url': downloadURL,
+                'uid':_broadcaster.uid,
+                'username': _broadcaster.username,
+                'likes': [],
+                'image': _broadcaster.image,
+                'createdAt': DateTime.now(),
+                });*/
+        print("helooodddddddddddddd");
+
+        /*String res = await FirestoreMethods().uploadPost(
+          "",
+          "" as Uint8List,
+          _broadcaster.uid,
+          _broadcaster.username,
+          _broadcaster.image,
+          true,
+          downloadURL,
+
+        );*/
+        String postId = const Uuid().v1();
+
+        Post post = Post(
+            description: "",
+            uid: _broadcaster.uid,
+            username: _broadcaster.username,
+            likes: [],
+            postId: postId,
+            datePublished: DateTime.now(),
+            postUrl: "",
+            image: _broadcaster.image,
+            isVoice:true,
+            VoiceUrl:downloadURL
+        );
+        await FirebaseFirestore.instance.collection('posts').doc(postId).set({
+          'description': "",
+          'uid': _broadcaster.uid,
+          'username': _broadcaster.username,
+          'likes': [],
+          'postId': postId,
+          'datePublished': DateTime.now(),
+          'postUrl': "",
+          'image': _broadcaster.image,
+          'isVoice':true,
+          'VoiceUrl':downloadURL});
+        print("heyyyyyyyyyyyyyyyyyyy" + downloadURL);
+
+
+      } catch (e) {
+        // Handle the upload error
+        print('Error uploading recording: $e');
+      }
+    }
+  }
+
+
+
 
   void _initEngine() async {
     _engine = await RtcEngine.createWithContext(RtcEngineContext(appId));
@@ -49,6 +165,8 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
 
     await _engine.enableVideo();
     await _engine.startPreview();
+    await _engine.enableAudio();
+
     await _engine.setChannelProfile(ChannelProfile.LiveBroadcasting);
 
     if (widget.isBroadcaster) {
@@ -257,6 +375,16 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
                         ],
                       ),
                     ),
+                  Positioned(
+                    top: 16.0,
+                    right: 16.0,
+                        child:InkWell(
+                          onTap: _toggleRecording,
+                          child: Icon(_isRecording ? Icons.stop : Icons.mic),
+                        ),
+
+                  ),
+
                 ],
               ),
             ),
@@ -268,7 +396,9 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
             ),
           ],
         ),
+
       ),
+
     );
   }
 
@@ -289,6 +419,23 @@ class _BroadcastScreenState extends State<BroadcastScreen> {
       channelId: widget.channelId,
     )
         : Container();
+  }
+
+  Widget _renderLocalPreview() {
+    return Container(
+      child: RtcLocalView.SurfaceView(),
+    );
+  }
+
+  Widget _renderRemoteVideo() {
+    if (remoteUid != null) {
+      return Container(
+        child: RtcRemoteView.SurfaceView(uid: remoteUid[0],
+          channelId: widget.channelId,),
+      );
+    } else {
+      return SizedBox.shrink();
+    }
   }
 
 }

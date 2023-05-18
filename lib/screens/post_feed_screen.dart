@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../models/user.dart';
 import '../providers/user_provider.dart';
+import '../widgets/voice_card.dart';
 
 class PostFeedScreen extends StatefulWidget {
   const PostFeedScreen({Key? key}) : super(key: key);
@@ -115,7 +116,10 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                   ),
                 ),
                 leading: CircleAvatar(
-                  backgroundImage: NetworkImage(user.image),
+                  backgroundImage:user.image!=""?
+                  NetworkImage(user.image.toString())
+                      : NetworkImage(
+                      'https://www.vhv.rs/dpng/d/312-3120300_default-profile-hd-png-download.png'),
                   radius: 20,
                 ),
                 title: Text(
@@ -132,20 +136,26 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
         },
       )
           : StreamBuilder(
-        stream: FirebaseFirestore.instance
+            stream: FirebaseFirestore.instance
             .collection('posts')
             .orderBy('datePublished', descending: true)
             .snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+            builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
           return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
+              itemCount: (snapshot.data! as dynamic).docs.length,
+            itemBuilder: (ctx, index) {
+              DocumentSnapshot snap =
+              (snapshot.data! as dynamic).docs[index];
+print( (snapshot.data! as dynamic).docs[index]);
 
-            itemBuilder: (ctx, index) => Padding(
+                  return snap['isVoice']==false?
+
+                Padding(
               padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               child: Container(
                 decoration: BoxDecoration(
@@ -160,10 +170,30 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                   ],
                 ),
                 child: PostCard(
-                  snap: snapshot.data!.docs[index].data(),
+                  snap: (snapshot.data! as dynamic).docs[index].data(),
                 ),
               ),
-            ),
+            ): Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.9),
+                        blurRadius: 2.0,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: VoiceCard(
+                    snap
+                        : (snapshot.data! as dynamic).docs[index].data(),
+                  ),
+                ),
+              );
+    }
           );
 
         },

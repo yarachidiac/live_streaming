@@ -1,7 +1,10 @@
 
+
+
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/user.dart';
 import '../providers/user_provider.dart';
@@ -20,13 +23,15 @@ class ChatCard extends StatelessWidget {
   Future<void> downloadAndOpenFile(String fileUrl, String fileName) async {
     try {
       final appDir = await getApplicationDocumentsDirectory();
-      final saveDir = appDir.path + '/downloads';
-
+      final saveDir = appDir.path ;
       final dio = Dio();
-      final response = await dio.download(fileUrl, '$saveDir/$fileName');
+      final response = await dio.download(fileUrl, '{$saveDir/$fileName}');
+
 
       if (response.statusCode == 200) {
-        await OpenFile.open('$saveDir/$fileName');
+        await OpenFile.open('{$saveDir}/$fileName');
+
+        print("successss00000000");
       } else {
         print( 'Failed to download file');
       }
@@ -39,15 +44,15 @@ class ChatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final User user = Provider.of<UserProvider>(context).user;
-
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       child: Row(
         children: [
           CircleAvatar(
-            backgroundImage: NetworkImage(
-              image ?? '',
-            ),
+            backgroundImage: user.image!=""?
+            NetworkImage(user.image)
+                : NetworkImage(
+                'https://www.vhv.rs/dpng/d/312-3120300_default-profile-hd-png-download.png'),
             radius: 18,
           ),
           Expanded(
@@ -63,13 +68,18 @@ class ChatCard extends StatelessWidget {
                       Expanded(child: Text(' ${snap.data()['message']}' ?? ''),)
                     ],
                   ),
+
                   if (snap.data().containsKey('fileUrl'))
                     TextButton(
                       onPressed: () async{
                         if (snap.data().containsKey('fileUrl')) {
                           String fileUrl = snap.data()['fileUrl'];
                           String fileNameWithExtension = snap.data()['fileName'];
-                          downloadAndOpenFile(fileUrl, fileNameWithExtension);
+                          launch(fileUrl);
+                          //downloadAndOpenFile(fileUrl, fileNameWithExtension);
+                          print(fileUrl);
+                          print(fileNameWithExtension);
+                          print(downloadAndOpenFile(fileUrl, fileNameWithExtension));
 
                         }
                       },

@@ -96,7 +96,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
 // Convert the Delta to HTML
       var html = DeltaToHTML.encodeJson(deltaJson);
-
+      print("laaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+      print(html);
 
       // upload to storage and db
       String res = await FirestoreMethods().uploadPost(
@@ -105,6 +106,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
         uid,
         username,
         profImage,
+        false,
+        ""
       );
       if (res == "success") {
         setState(() {
@@ -162,7 +165,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
           ),
           centerTitle: false,
           actions: <Widget>[
-             TextButton(
+            TextButton(
               onPressed: () =>
                   postImage(
                     userProvider.user.uid,
